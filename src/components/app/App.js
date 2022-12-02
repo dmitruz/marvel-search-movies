@@ -1,41 +1,43 @@
-import { useState } from "react";
+import {lazy, Suspense} from 'react';
+import {BrowserRouter as Router, Route, Outlet} from 'react-router-dom';
+
 import AppHeader from "../appHeader/AppHeader";
-import RandomChar from "../randomChar/RandomChar";
-import CharList from "../charList/CharList";
-import CharInfo from "../charInfo/CharInfo";
-import ErrorBoundary from "../errorBoundary/ErrorBoundary";
+import Spinner from '../spinner/Spinner';
 
-import decoration from '../../resources/img/vision.png';
+const Page404 = lazy(() => import('../pages/404'));
+const MainPage = lazy(() => import('../pages/MainPage'));
+const ComicsPage = lazy(() => import('../pages/ComicsPage'));
+const SingleComicPage = lazy(() => import('../pages/SingleComicPage'));
 
+// 751
 const App = () => {
     
-    const [selectedChar, setChar] = useState(null);
-
-    const onCharSelected = (id) => {
-        setChar(id);
-    }
-
     return (
-        <div className="app">
-            <AppHeader/>
-            <main>
-                <ErrorBoundary>
-                    <RandomChar/>
-                </ErrorBoundary>
-                <div className="char__content">
-                    <ErrorBoundary>
-                        <CharList onCharSelected={onCharSelected}/>
-                    </ErrorBoundary>
-                    <ErrorBoundary>
-                        <CharInfo charId={selectedChar}/>
-                    </ErrorBoundary>
-                </div>
-                <img className="bg-decoration" src={decoration} alt="vision"/>
-            </main>
-        </div>
+        <Router>
+            <div className="app">
+                <AppHeader/>
+                <main>
+                    <Suspense fallback={<Spinner/>}>
+                        <Outlet>
+                            <Route exact path="/">
+                                <MainPage/>
+                            </Route>
+                            <Route exact path="/comics">
+                                <ComicsPage/>
+                            </Route>
+                            <Route exact path="/comics/:comicId">
+                                <SingleComicPage/>
+                            </Route>
+                            <Route path="*">
+                                <Page404/>
+                            </Route>
+                        </Outlet>
+                    </Suspense>
+                </main>
+            </div>
+        </Router>
     )
 }
 
-//https://github.com/yankovalenko94/JS_task_answers/tree/master/React_Redux_step_24
-
 export default App;
+
